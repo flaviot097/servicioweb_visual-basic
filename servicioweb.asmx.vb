@@ -196,4 +196,39 @@ Public Class servicioweb
         Return documentoXML
     End Function
 
+    <WebMethod()>
+    Public Function ActualizarUsuario(id As Integer, nombre As String, contrasena As String) As XmlDocument
+        Dim resultado As String
+        Dim documentoXML As XmlDocument = New XmlDocument()
+        Dim raiz As XmlElement = documentoXML.CreateElement("Resultado_de_actualiazar")
+        'Dim consulta As String = $"UPDATE Users SET Username = {nombre} , password= {contrasena} WHERE id={id}"
+        Dim consulta As String = $"UPDATE Users SET Username =@username ,password=@password WHERE id=@id"
+
+
+        Try
+            conexion.Open()
+            Dim cmd As SqlCommand = New SqlCommand(consulta, conexion)
+            cmd.Parameters.AddWithValue("@username", nombre)
+            cmd.Parameters.AddWithValue("@password", contrasena)
+            cmd.Parameters.AddWithValue("@id", id)
+
+            Dim filasAfectadas As Integer = cmd.ExecuteNonQuery()
+            If filasAfectadas > 0 Then
+                resultado = "Se actualizo el usuario con exito"
+            Else
+                resultado = "Error al actializar usuario"
+            End If
+        Catch ex As Exception
+            resultado = "Error " & ex.Message
+        Finally
+            If conexion.State = ConnectionState.Open Then
+                conexion.Close()
+            End If
+        End Try
+
+        raiz.InnerText = resultado
+        documentoXML.AppendChild(raiz)
+
+        Return documentoXML
+    End Function
 End Class
